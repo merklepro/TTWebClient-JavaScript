@@ -46,7 +46,7 @@
                             var tbody = table.append('<tbody>');
                             for (key in result) {
                                 var trow = '';
-                                if (key.includes('Time'))
+                                if (key.indexOf('Time') != -1)
                                     trow += '<td>' + key + '</td><td>' + new Date(result[key]).toUTCString() + '</td>';
                                 else
                                     trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
