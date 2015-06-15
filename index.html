@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript TickTrader Web API client example</title>
+    <link rel="icon" href="https://www.soft-fx.com/favicon2.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="css/styles.css" type="stylesheet" />
+    <script src="lib/jquery-2.1.4.js"></script>
+    <script src="ttwebclient.js"></script>
+    <script type="text/javascript">
+        function errorHandler(x, status, error) {
+            var message = "An error occurred: " + status;
+            if (error) {
+                message += " (code=" + error + ")";
+            }
+            alert(message);
+        }
+    </script>
+</head>
+<body class="common-section">
+<div id='header'>
+    <div class="common-ui-wrap">
+        <a id="logo" href="https://www.soft-fx.com/"></a>
+        <form id='api_selector'>
+            <div class='input'><input placeholder="https://tpdemo.fxopen.com:5020" id="input_baseUrl" name="baseUrl" type="text"/></div>
+            <div class='input'><input placeholder="Web API Id" id="input_WebApiId" name="webApiId" type="text"/></div>
+            <div class='input'><input placeholder="Web API Key" id="input_WebApiKey" name="webApiKey" type="text"/></div>
+            <div class='input'><input placeholder="Web API Secret" id="input_WebApiSecret" name="webApiSecret" type="text"/></div>
+            <div class='input'>Authentication type:
+                <br/><input id="input_WebApiAuth_HMAC" name="webApiAuth" type="radio" value="HMAC" checked="checked">HMAC</input>
+                <br/><input id="input_WebApiAuth_Basic" name="webApiAuth" type="radio" value="Basic">Basic</input>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="common-ui-wrap">
+    <h1>Public Trade Session information <input type="submit" value="update" onclick="updatePublicTradeSession();"/></h1>
+    <script type="text/javascript">
+        function updatePublicTradeSession() {
+            try {
+                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
+                client.getPublicTradeSession()
+                        .done(function (result) {
+                            $('#public-tradesession').children().remove();
+                            $('#public-tradesession').append('<table><thead><tr><th>Property</th><th>Value</th></tr></thead></table>');
+                            var table = $('#public-tradesession').children();
+                            var tbody = table.append('<tbody>');
+                            for (key in result) {
+                                var trow = '';
+                                if (key.includes('Time'))
+                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toUTCString() + '</td>';
+                                else
+                                    trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+    </script>
+    <div id='public-tradesession'>
+    </div>
+</div>
+<div class="common-ui-wrap">
+    <h1>Public Currency information <input type="submit" value="update" onclick="updatePublicCurrency();"/></h1>
+    <script type="text/javascript">
+        function updatePublicCurrency() {
+            try {
+                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
+                client.getPublicAllCurrencies()
+                        .done(function (result) {
+                            $('#public-currency').children().remove();
+                            $('#public-currency').append('<table><thead><tr><th>Name</th><th>Precision</th><th>Description</th></tr></thead></table>');
+                            var table = $('#public-currency').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var currency = result[index];
+                                for (key in currency) {
+                                    trow += '<td>' + currency[key] + '</td>';
+                                }
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+    </script>
+    <div id='public-currency'>
+    </div>
+</div>
+<div class="common-ui-wrap">
+    <h1>Public Symbols information <input type="submit" value="update" onclick="updatePublicSymbols();"/></h1>
+    <script type="text/javascript">
+        function updatePublicSymbols() {
+            try {
+                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
+                client.getPublicAllSymbols()
+                        .done(function (result) {
+                            $('#public-symbols').children().remove();
+                            $('#public-symbols').append('<table><thead><tr><th>Symbol</th><th>Precision</th><th>Contract Size</th><th>Description</th></tr></thead></table>');
+                            var table = $('#public-symbols').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var symbol = result[index];
+                                trow += '<td>' + symbol['Symbol'] + '</td>';
+                                trow += '<td>' + symbol['Precision'] + '</td>';
+                                trow += '<td>' + symbol['ContractSize'] + '</td>';
+                                trow += '<td>' + symbol['Description'] + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+    </script>
+    <div id='public-symbols'>
+    </div>
+</div>
+<div class="common-ui-wrap">
+    <h1>Public Feed Tick information <input type="submit" value="update" onclick="updatePublicTicks();"/></h1>
+    <script type="text/javascript">
+        function updatePublicTicks() {
+            try {
+                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
+                client.getPublicAllTicks()
+                        .done(function (result) {
+                            $('#public-ticks').children().remove();
+                            $('#public-ticks').append('<table><thead><tr><th>Symbol</th><th>Bid Price</th><th>Bid Volume</th><th>Ask Price</th><th>Ask Volume</th><th>Timestamp</th></tr></thead></table>');
+                            var table = $('#public-ticks').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var tick = result[index];
+                                trow += '<td>' + tick['Symbol'] + '</td>';
+                                trow += '<td>' + tick['BestBid']['Price'] + '</td>';
+                                trow += '<td>' + tick['BestBid']['Volume'] + '</td>';
+                                trow += '<td>' + tick['BestAsk']['Price'] + '</td>';
+                                trow += '<td>' + tick['BestAsk']['Volume'] + '</td>';
+                                trow += '<td>' + new Date(tick['Timestamp']).toUTCString() + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+    </script>
+    <div id='public-ticks'>
+    </div>
+</div>
+</body>
+</html>
