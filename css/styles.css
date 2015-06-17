@@ -122,7 +122,7 @@
 .common-section .common-ui-wrap {
   line-height: 1;
   font-family: "Droid Sans", sans-serif;
-  min-width: 1200px;
+  min-width: 1300px;
   max-width: 1300px;
   margin-left: auto;
   margin-right: auto;
@@ -223,7 +223,7 @@
   color: #aaaaaa;
 }
 .common-section .common-ui-wrap a {
-  color: #547f00;
+  color: #000000;
 }
 .common-section .common-ui-wrap a img {
   border: none;
@@ -1260,7 +1260,7 @@
 .common-section #header form#api_selector .input a#explore:hover {
   background-color: #547f00;
 }
-.common-section #header form#api_selector .input input {
+.common-section #header form#api_selector .input input button {
   font-size: 0.9em;
   padding: 3px;
   margin: 0;
