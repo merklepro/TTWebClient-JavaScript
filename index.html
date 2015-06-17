@@ -5,49 +5,139 @@
     <link rel="icon" href="https://www.soft-fx.com/favicon2.ico" type="image/x-icon" />
     <link rel="stylesheet" href="css/styles.css" type="stylesheet" />
     <script src="lib/jquery-2.1.4.js"></script>
+    <script src="lib/Crypto-JS/core-min.js"></script>
+    <script src="lib/Crypto-JS/hmac-sha256.js"></script>
+    <script src="lib/Crypto-JS/enc-base64-min.js"></script>
     <script src="ttwebclient.js"></script>
     <script type="text/javascript">
+        function getValueOrDefault(value, defaultValue) {
+            if (value !== undefined)
+                return value;
+            else
+                return defaultValue;
+        }
+
         function errorHandler(x, status, error) {
+            disconnect();
             var message = "An error occurred: " + status;
             if (error) {
                 message += " (code=" + error + ")";
             }
             alert(message);
         }
-    </script>
-</head>
-<body class="common-section">
-<div class="common-ui-wrap" id='header'>
-    <div class="common-ui-wrap">
-        <a id="logo" href="https://www.soft-fx.com/"></a>
-        <form id='api_selector'>
-            <div class='input'><input placeholder="https://tpdemo.fxopen.com:5020" id="input_baseUrl" name="baseUrl" type="text"/></div>
-            <div class='input'><input placeholder="Web API Id" id="input_WebApiId" name="webApiId" type="text"/></div>
-            <div class='input'><input placeholder="Web API Key" id="input_WebApiKey" name="webApiKey" type="text"/></div>
-            <div class='input'><input placeholder="Web API Secret" id="input_WebApiSecret" name="webApiSecret" type="text"/></div>
-            <div class='input'>Authentication type:
-                <br/><input id="input_WebApiAuth_HMAC" name="webApiAuth" type="radio" value="HMAC" checked="checked">HMAC</input>
-                <br/><input id="input_WebApiAuth_Basic" name="webApiAuth" type="radio" value="Basic">Basic</input>
-            </div>
-        </form>
-    </div>
-</div>
-<div class="common-ui-wrap">
-    <h1>Public Trade Session information <input type="submit" value="update" onclick="updatePublicTradeSession();"/></h1>
-    <script type="text/javascript">
-        function updatePublicTradeSession() {
+
+        function toggleVisibility(id) {
+            var e = document.getElementById(id);
+            if(e.style.display == 'block')
+                e.style.display = 'none';
+            else
+                e.style.display = 'block';
+        }
+
+        var timer = null;
+        var accountType = null;
+
+        function init() {
+            $('.Connect').click(function() {
+                var $this = $(this);
+                if ($this.hasClass('Connect')) {
+                    $.when(updateTradeSessionStatus(), updateAccount(), updateSymbols()).done(function () {
+                        connect();
+                    });
+                } else {
+                    disconnect();
+                }
+            });
+        }
+
+        function connect() {
+            if (!timer) {
+                timer = setInterval(update, 1000);
+
+                var button = $('#connect');
+                button.text('Disconnect');
+                button.toggleClass('Connect');
+            }
+        }
+
+        function disconnect() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+
+                clear();
+
+                var button = $('#connect');
+                button.text('Connect');
+                button.toggleClass('Connect');
+            }
+        }
+
+        function clear() {
+            $('#account').children().remove();
+            $('#ticks').children().remove();
+            $('#level2').children().remove();
+            $('#level2symbol').children().remove();
+            $('#trade-session-status').children().remove();
+            $('#assets').children().remove();
+            $('#positions').children().remove();
+            $('#trades').children().remove();
+        }
+
+        function createWebApiClient() {
+            return new TickTraderWebClient($('#input_baseUrl')[0].value, $('#input_WebApiId')[0].value, $('#input_WebApiKey')[0].value, $('#input_WebApiSecret')[0].value);
+        }
+
+        function update() {
+            updateAccount();
+            updateTicks();
+            updateLevel2($('#level2symbol').val());
+            if (accountType == 'Cash')
+                updateAssets();
+            if (accountType == 'Net')
+                updatePositions();
+            updateTrades();
+        }
+
+        function updateAccount() {
             try {
-                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
-                client.getPublicTradeSession()
+                var client = createWebApiClient();
+                return client.getAccount()
                         .done(function (result) {
-                            $('#public-tradesession').children().remove();
-                            $('#public-tradesession').append('<table><thead><tr><th>Property</th><th>Value</th></tr></thead></table>');
-                            var table = $('#public-tradesession').children();
+                            $('#account').children().remove();
+                            $('#account').append('<table style="width:100%"><thead><tr><th>Property</th><th>Value</th></tr></thead></table>');
+                            var table = $('#account').children();
                             var tbody = table.append('<tbody>');
                             for (key in result) {
                                 var trow = '';
-                                if (key.indexOf('Time') != -1)
-                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toUTCString() + '</td>';
+                                if (key == 'Registered')
+                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toLocaleString() + '</td>';
+                                else
+                                    trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                            accountType = result['AccountingType'];
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+
+        function updateTradeSessionStatus() {
+            try {
+                var client = createWebApiClient();
+                return client.getTradeSession()
+                        .done(function (result) {
+                            $('#trade-session-status').children().remove();
+                            $('#trade-session-status').append('<table style="width:100%"><thead><tr><th>Property</th><th>Value</th></tr></thead></table>');
+                            var table = $('#trade-session-status').children();
+                            var tbody = table.append('<tbody>');
+                            for (key in result) {
+                                var trow = '';
+                                if ((key == 'SessionStartTime') || (key == 'SessionEndTime') || (key == 'SessionOpenTime') || (key == 'SessionCloseTime'))
+                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toLocaleString() + '</td>';
                                 else
                                     trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
                                 tbody.append('<tr>' + trow + '</tr>');
@@ -59,61 +149,17 @@
                 errorHandler(null, err, null);
             }
         }
-    </script>
-    <div id='public-tradesession'>
-    </div>
-</div>
-<div class="common-ui-wrap">
-    <h1>Public Currency information <input type="submit" value="update" onclick="updatePublicCurrency();"/></h1>
-    <script type="text/javascript">
-        function updatePublicCurrency() {
+
+        function updateSymbols() {
             try {
-                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
-                client.getPublicAllCurrencies()
+                var client = createWebApiClient();
+                return client.getAllSymbols()
                         .done(function (result) {
-                            $('#public-currency').children().remove();
-                            $('#public-currency').append('<table><thead><tr><th>Name</th><th>Precision</th><th>Description</th></tr></thead></table>');
-                            var table = $('#public-currency').children();
-                            var tbody = table.append('<tbody>');
+                            $('#level2symbol').children().remove();
+                            var options = $('#level2symbol');
                             for (index in result) {
-                                var trow = '';
-                                var currency = result[index];
-                                for (key in currency) {
-                                    trow += '<td>' + currency[key] + '</td>';
-                                }
-                                tbody.append('<tr>' + trow + '</tr>');
-                            }
-                        })
-                        .error(errorHandler)
-            }
-            catch (err) {
-                errorHandler(null, err, null);
-            }
-        }
-    </script>
-    <div id='public-currency'>
-    </div>
-</div>
-<div class="common-ui-wrap">
-    <h1>Public Symbols information <input type="submit" value="update" onclick="updatePublicSymbols();"/></h1>
-    <script type="text/javascript">
-        function updatePublicSymbols() {
-            try {
-                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
-                client.getPublicAllSymbols()
-                        .done(function (result) {
-                            $('#public-symbols').children().remove();
-                            $('#public-symbols').append('<table><thead><tr><th>Symbol</th><th>Precision</th><th>Contract Size</th><th>Description</th></tr></thead></table>');
-                            var table = $('#public-symbols').children();
-                            var tbody = table.append('<tbody>');
-                            for (index in result) {
-                                var trow = '';
                                 var symbol = result[index];
-                                trow += '<td>' + symbol['Symbol'] + '</td>';
-                                trow += '<td>' + symbol['Precision'] + '</td>';
-                                trow += '<td>' + symbol['ContractSize'] + '</td>';
-                                trow += '<td>' + symbol['Description'] + '</td>';
-                                tbody.append('<tr>' + trow + '</tr>');
+                                options.append('<option>' + symbol['Symbol'] + '</option>');
                             }
                         })
                         .error(errorHandler)
@@ -122,21 +168,15 @@
                 errorHandler(null, err, null);
             }
         }
-    </script>
-    <div id='public-symbols'>
-    </div>
-</div>
-<div class="common-ui-wrap">
-    <h1>Public Feed Tick information <input type="submit" value="update" onclick="updatePublicTicks();"/></h1>
-    <script type="text/javascript">
-        function updatePublicTicks() {
+
+        function updateTicks() {
             try {
-                var client = new TickTraderWebClient($('#input_baseUrl')[0].value);
-                client.getPublicAllTicks()
+                var client = createWebApiClient();
+                return client.getAllTicks()
                         .done(function (result) {
-                            $('#public-ticks').children().remove();
-                            $('#public-ticks').append('<table><thead><tr><th>Symbol</th><th>Bid Price</th><th>Bid Volume</th><th>Ask Price</th><th>Ask Volume</th><th>Timestamp</th></tr></thead></table>');
-                            var table = $('#public-ticks').children();
+                            $('#ticks').children().remove();
+                            $('#ticks').append('<table style="width:100%"><thead><tr><th>Symbol</th><th>Bid Price</th><th>Bid Volume</th><th>Ask Price</th><th>Ask Volume</th></tr></thead></table>');
+                            var table = $('#ticks').children();
                             var tbody = table.append('<tbody>');
                             for (index in result) {
                                 var trow = '';
@@ -146,7 +186,138 @@
                                 trow += '<td>' + tick['BestBid']['Volume'] + '</td>';
                                 trow += '<td>' + tick['BestAsk']['Price'] + '</td>';
                                 trow += '<td>' + tick['BestAsk']['Volume'] + '</td>';
-                                trow += '<td>' + new Date(tick['Timestamp']).toUTCString() + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+
+        function updateLevel2(symbol) {
+            if (!symbol)
+                return;
+
+            try {
+                var client = createWebApiClient();
+                return client.getTickLevel2(symbol)
+                        .done(function (result) {
+                            $('#level2').children().remove();
+                            $('#level2').append('<table style="width:100%"><thead><tr><th>Bid</th><th>Price</th><th>Ask</th></tr></thead></table>');
+                            var table = $('#level2').children();
+                            var tbody = table.append('<tbody>');
+                            var asks = result['Asks'].sort(function (a, b) { return a['Price'] - b['Price'] });
+                            for (index in asks) {
+                                var trow = '';
+                                var tick = asks[index];
+                                trow += '<td></td>';
+                                trow += '<td style="background: #FFE4FF;">' + tick['Price'] + '</td>';
+                                trow += '<td style="background: #FFE4FF;">' + tick['Volume'] + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                            var bids = result['Bids'].sort(function (a, b) { return a['Price'] - b['Price'] });
+                            for (index in bids) {
+                                var trow = '';
+                                var tick = bids[index];
+                                trow += '<td style="background: #C0FFC0;">' + tick['Volume'] + '</td>';
+                                trow += '<td style="background: #C0FFC0;">' + tick['Price'] + '</td>';
+                                trow += '<td></td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+
+        function selectSymbolLevel2(list) {
+            var idx = list.selectedIndex;
+            var content = list.options[idx].innerHTML;
+            updateLevel2(content);
+        }
+
+        function updateAssets() {
+            try {
+                var client = createWebApiClient();
+                return client.getAllAssets()
+                        .done(function (result) {
+                            $('#assets').children().remove();
+                            $('#assets').append('<table style="width:100%"><thead><tr><th>Currency</th><th>Amount</th></tr></thead></table>');
+                            var table = $('#assets').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var asset = result[index];
+                                trow += '<td>' + asset['Currency'] + '</td>';
+                                trow += '<td>' + asset['Amount'] + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+
+        function updatePositions() {
+            try {
+                var client = createWebApiClient();
+                return client.getAllPositions()
+                        .done(function (result) {
+                            $('#positions').children().remove();
+                            $('#positions').append('<table style="width:100%"><thead><tr><th>Symbol</th><th>Long Amount</th><th>Long Price</th><th>Short Amount</th><th>Short Price</th><th>Commission</th><th>Swap</th></tr></thead></table>');
+                            var table = $('#positions').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var position = result[index];
+                                trow += '<td>' + getValueOrDefault(position['Symbol'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['LongAmount'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['LongPrice'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['ShortAmount'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['ShortPrice'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['Commission'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(position['Swap'], '') + '</td>';
+                                tbody.append('<tr>' + trow + '</tr>');
+                            }
+                        })
+                        .error(errorHandler)
+            }
+            catch (err) {
+                errorHandler(null, err, null);
+            }
+        }
+
+        function updateTrades() {
+            try {
+                var client = createWebApiClient();
+                return client.getAllTrades()
+                        .done(function (result) {
+                            $('#trades').children().remove();
+                            $('#trades').append('<table style="width:100%"><thead><tr><th>Id</th><th>Type</th><th>Side</th><th>Symbol</th><th>Price</th><th>Amount</th><th>Initial Amount</th><th>Stop Loss</th><th>Take Profit</th><th>Margin</th><th>Commission</th><th>Swap</th><th>Comment</th></tr></thead></table>');
+                            var table = $('#trades').children();
+                            var tbody = table.append('<tbody>');
+                            for (index in result) {
+                                var trow = '';
+                                var trade = result[index];
+                                trow += '<td>' + getValueOrDefault(trade['Id'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Type'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Side'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Symbol'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Price'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Amount'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['InitialAmount'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['StopLoss'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['TakeProfit'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Margin'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Commission'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Swap'], '') + '</td>';
+                                trow += '<td>' + getValueOrDefault(trade['Comment'], '') + '</td>';
                                 tbody.append('<tr>' + trow + '</tr>');
                             }
                         })
@@ -157,7 +328,53 @@
             }
         }
     </script>
-    <div id='public-ticks'>
+</head>
+<body class="common-section" onload="init();">
+<div class="common-ui-wrap" id='header'>
+    <div class="common-ui-wrap">
+        <a id="logo" href="https://www.soft-fx.com/"></a>
+        <form id='api_selector'>
+            <div class='input'><input placeholder="https://tpdemo.fxopen.com:5020" id="input_baseUrl" name="baseUrl" type="text" value="https://tp.dev.soft-fx.eu:5020"/></div>
+            <div class='input'><input placeholder="Web API Id" id="input_WebApiId" name="webApiId" type="text" value="549625e8-9ea1-48bd-bcc9-d9a5bba60be5"/></div>
+            <div class='input'><input placeholder="Web API Key" id="input_WebApiKey" name="webApiKey" type="text" value="tP8dtrRRrSeRdkQQ"/></div>
+            <div class='input'><input placeholder="Web API Secret" id="input_WebApiSecret" name="webApiSecret" type="text" value="hJZcR9PQ49s3CHMzEye77YGs4Srzgz6ktbyzC4XpzHNAnKchXnBEHHytcFj9RqGD"/></div>
+            <div class='input'><button id="connect" class="Connect" type="button">Connect</button></div>
+        </form>
+    </div>
+</div>
+<div class="common-ui-wrap">
+    <div style="width:500px; float:left;">
+        <div>
+            <h1><a href="#account" onclick="toggleVisibility('account');">Account Information</a></h1>
+            <div id='account' style="display: block;"></div>
+        </div>
+        <div>
+            <h1><a href="#ticks" onclick="toggleVisibility('ticks');">Feed Ticks</a></h1>
+            <div id='ticks' style="display: block;"></div>
+        </div>
+        <div>
+            <h1><a href="#level2" onclick="toggleVisibility('level2');">Level2</a></h1>
+            <select id='level2symbol' onchange="selectSymbolLevel2(this);"></select>
+            <div id='level2' style="display: block;"></div>
+        </div>
+        <div>
+            <h1><a href="#trade-session-status" onclick="toggleVisibility('trade-session-status');">Trade Session Status</a></h1>
+            <div id='trade-session-status' style="display: block;"></div>
+        </div>
+    </div>
+    <div style="padding-left: 50px; width:750px; float:left;">
+        <div>
+            <h1><a href="#assets" onclick="toggleVisibility('assets');">Assets</a></h1>
+            <div id='assets' style="display: block;"></div>
+        </div>
+        <div>
+            <h1><a href="#positions" onclick="toggleVisibility('positions');">Positions</a></h1>
+            <div id='positions' style="display: block;"></div>
+        </div>
+        <div>
+            <h1><a href="#trades" onclick="toggleVisibility('trades');">Trades</a></h1>
+            <div id='trades' style="display: block;"></div>
+        </div>
     </div>
 </div>
 </body>
