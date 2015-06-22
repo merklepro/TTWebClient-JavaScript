@@ -61,7 +61,7 @@ function getPublicTradeSessionStatus() {
         console.log(result['PlatformTimezoneOffset']);
         console.log(result['SessionStatus']);
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -81,7 +81,7 @@ function getPublicAllCurrencies() {
           console.log(result[key]['Precision']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -101,7 +101,7 @@ function getPublicAllSymbols() {
           console.log(result[key]['Precision']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -122,7 +122,7 @@ function getPublicAllTicks() {
           console.log(result[key]['BestAsk']['Price']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -143,7 +143,7 @@ function getPublicAllTicksLevel2() {
           console.log(result[key]['Asks'].length);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -162,7 +162,7 @@ function getAccount() {
         console.log(result['Name']);
         console.log(result['Group']);
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -179,7 +179,7 @@ function getTradeSession() {
       .done(function (result) {
         console.log(result['SessionStatus']);
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -199,7 +199,7 @@ function getAllCurrencies() {
           console.log(result[key]['Precision']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -219,7 +219,7 @@ function getAllSymbols() {
           console.log(result[key]['Precision']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -240,7 +240,7 @@ function getAllTicks() {
           console.log(result[key]['BestAsk']['Price']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -261,7 +261,7 @@ function getAllTicksLevel2() {
           console.log(result[key]['Asks'].length);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -282,7 +282,7 @@ function getAllAssets() {
           console.log(result[key]['Amount']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -304,7 +304,7 @@ function getAllPositions() {
           console.log(result[key]['ShortAmount']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
   }
   catch (err) {
     errorHandler(null, err, null);
@@ -326,7 +326,52 @@ function getAllTrades() {
           console.log(result[key]['Amount']);
         }
       })
-      .error(errorHandler)
+      .error(errorHandler);
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account trade history
+```JavaScript
+function getTradeHistory() {
+  try {
+    var client = createWebApiClient();
+    var request = {
+      TimestampTo: new Date().getTime(),
+      RequestPageSize: 100,
+      RequestDirection: "Backward"
+    };
+    return client.getTradeHistory(request)
+      .done(function (result) { updateTradeHistoryLoop(client, request, result); })
+      .error(errorHandler);    
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+
+function updateTradeHistoryLoop(client, request, result) {
+  try {
+    var lastId = null;
+    for (index in records) {
+      var history = records[index];
+      lastId = getValueOrDefault(history['Id'], null);
+      console.log(new Date(history['TransactionTimestamp']).toLocaleString());
+      console.log(history['TransactionType']);
+      console.log(history['TransactionReason']);
+      console.log(history['Symbol']);
+      console.log(history['TradeId']);
+    }
+
+    if (!result['IsLastReport']) {
+      request['RequestLastId'] = lastId;
+      return client.getTradeHistory(request)
+        .done(function (result) { updateTradeHistoryLoop(client, request, result); })
+        .error(errorHandler);
+    }
   }
   catch (err) {
     errorHandler(null, err, null);
