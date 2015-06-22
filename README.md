@@ -378,3 +378,66 @@ function updateTradeHistoryLoop(client, request, result) {
   }
 }
 ```
+
+## Create, modify and cancel limit order
+```JavaScript
+function createTrade() {
+  try {
+    var client = createWebApiClient();
+    var request = {
+      Type = "Limit", 
+      Side = "Buy",
+      Symbol = "EURUSD", 
+      Amount = 10000, 
+      Price = 1.0,
+      Comment = "Buy limit from Web API sample"    
+    };    
+    if (confirm("Do you want to create new trade?")) {
+      return client.createTrade(request)
+        .done(function (result) {
+          alert("New " + result['Type'] + " trade was created at " + result['Price'] + " with Id = " + result['Id']);
+        })
+        .error(errorHandler)
+    }    
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+
+function modifyTrade(tradeId) {
+  try {
+    var client = createWebApiClient();
+    var request = {
+      Id = tradeId, 
+      Comment = "Modified limit from Web API sample"
+    };    
+    if (confirm("Do you want to modify trade with Id = " + tradeId + "?")) {
+      return client.modifyTrade(request)
+        .done(function (result) {
+          alert(result['Type'] + " trade with Id = " + result['Id'] + " was successfully modified!");
+        })
+        .error(errorHandler)
+    }    
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+
+function cancelTrade(tradeId) {
+  try {
+    var client = createWebApiClient();
+    if (confirm("Do you want to cancel trade with Id = " + tradeId + "?")) {
+      return client.cancelTrade(tradeId)
+        .done(function (result) {
+          alert("Pending trade with Id = " + tradeId + " was successfully canceled!");
+        })
+        .error(errorHandler)
+    }    
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
