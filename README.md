@@ -68,3 +68,268 @@ function getPublicTradeSessionStatus() {
   }
 }
 ```
+
+## Access to public currencies information
+```JavaScript
+function getPublicAllCurrencies() {
+  try {
+    var client = createWebApiClient();
+    return client.getPublicAllCurrencies()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Name']);
+          console.log(result[key]['Precision']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to public symbols information
+```JavaScript
+function getPublicAllSymbols() {
+  try {
+    var client = createWebApiClient();
+    return client.getPublicAllSymbols()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['Precision']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to public feed ticks information
+```JavaScript
+function getPublicAllTicks() {
+  try {
+    var client = createWebApiClient();
+    return client.getPublicAllTicks()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['BestBid']['Price']);
+          console.log(result[key]['BestAsk']['Price']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to public feed ticks level2 information
+```JavaScript
+function getPublicAllTicksLevel2() {
+  try {
+    var client = createWebApiClient();
+    return client.getPublicAllTicksLevel2()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['Bids'].length);
+          console.log(result[key]['Asks'].length);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account information
+```JavaScript
+function getAccount() {
+  try {
+    var client = createWebApiClient();
+    return client.getAccount()
+      .done(function (result) {
+        console.log(result['Id']);
+        console.log(result['Name']);
+        console.log(result['Group']);
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account trade session information
+```JavaScript
+function getTradeSession() {
+  try {
+    var client = createWebApiClient();
+    return client.getTradeSession()
+      .done(function (result) {
+        console.log(result['SessionStatus']);
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account currencies information
+```JavaScript
+function getAllCurrencies() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllCurrencies()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Name']);
+          console.log(result[key]['Precision']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account symbols information
+```JavaScript
+function getAllSymbols() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllSymbols()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['Precision']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account feed ticks information
+```JavaScript
+function getAllTicks() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllTicks()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['BestBid']['Price']);
+          console.log(result[key]['BestAsk']['Price']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account feed ticks level2 information
+```JavaScript
+function getAllTicksLevel2() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllTicksLevel2()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['Bids'].length);
+          console.log(result[key]['Asks'].length);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account assets information
+Works only for cash accounts!
+```JavaScript
+function getAllAssets() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllAssets()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Currency']);
+          console.log(result[key]['Amount']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account positions information
+Works only for net accounts!
+```JavaScript
+function getAllPositions() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllPositions()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['LongAmount']);
+          console.log(result[key]['ShortAmount']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
+
+## Access to account trades
+```JavaScript
+function getAllTrades() {
+  try {
+    var client = createWebApiClient();
+    return client.getAllTrades()
+      .done(function (result) {
+        for (key in result) {
+          console.log(result[key]['Id']);
+          console.log(result[key]['Type']);
+          console.log(result[key]['Symbol']);
+          console.log(result[key]['Amount']);
+        }
+      })
+      .error(errorHandler)
+  }
+  catch (err) {
+    errorHandler(null, err, null);
+  }
+}
+```
