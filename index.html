@@ -14,7 +14,7 @@
     <script type="text/javascript">
         function getTimeOrDefault(value, defaultValue) {
             if (value !== undefined)
-                return new Date(value).toLocaleString();
+                return new Date(value).toUTCString();
             else
                 return defaultValue;
         }
@@ -110,7 +110,7 @@
         function createWebApiClient() {
             return new TickTraderWebClient($('#input_baseUrl')[0].value, $('#input_WebApiId')[0].value, $('#input_WebApiKey')[0].value, $('#input_WebApiSecret')[0].value);
         }
-
+        
         var accountType = null;
 
         function update() {
@@ -149,7 +149,7 @@
                             for (key in result) {
                                 var trow = '';
                                 if (key == 'Registered')
-                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toLocaleString() + '</td>';
+                                    trow += '<td>' + key + '</td><td>' + getTimeOrDefault(result[key], '') + '</td>';
                                 else
                                     trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
                                 tbody.append('<tr>' + trow + '</tr>');
@@ -175,7 +175,7 @@
                             for (key in result) {
                                 var trow = '';
                                 if ((key == 'SessionStartTime') || (key == 'SessionEndTime') || (key == 'SessionOpenTime') || (key == 'SessionCloseTime'))
-                                    trow += '<td>' + key + '</td><td>' + new Date(result[key]).toLocaleString() + '</td>';
+                                    trow += '<td>' + key + '</td><td>' + getTimeOrDefault(result[key], '') + '</td>';
                                 else
                                     trow += '<td>' + key + '</td><td>' + result[key] + '</td>';
                                 tbody.append('<tr>' + trow + '</tr>');
@@ -535,7 +535,7 @@
                 var request = {
                     TimestampFrom: fromTimestamp.getTime(),
                     TimestampTo: toTimestamp.getTime(),
-                    RequestPageSize: 1,
+                    RequestPageSize: 100,
                     RequestDirection: "Backward"
                 };
                 return client.getTradeHistory(request)
@@ -555,7 +555,7 @@
                     var trow = '';
                     var history = records[index];
                     lastId = getValueOrDefault(history['Id'], null);
-                    trow += '<td>' + new Date(history['TransactionTimestamp']).toLocaleString() + '</td>';
+                    trow += '<td>' + getTimeOrDefault(history['TransactionTimestamp'], '') + '</td>';
                     trow += '<td>' + getValueOrDefault(history['TransactionType'], '') + '</td>';
                     trow += '<td>' + getValueOrDefault(history['TransactionReason'], '') + '</td>';
                     trow += '<td>' + getValueOrDefault(history['Symbol'], '') + '</td>';

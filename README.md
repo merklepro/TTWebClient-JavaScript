@@ -359,7 +359,7 @@ function updateTradeHistoryLoop(client, request, result) {
     for (index in records) {
       var history = records[index];
       lastId = getValueOrDefault(history['Id'], null);
-      console.log(new Date(history['TransactionTimestamp']).toLocaleString());
+      console.log(new Date(history['TransactionTimestamp']).toUTCString());
       console.log(history['TransactionType']);
       console.log(history['TransactionReason']);
       console.log(history['Symbol']);
