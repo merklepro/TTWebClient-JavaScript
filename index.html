@@ -463,12 +463,13 @@
                 return client.getAllPositions()
                         .done(function (result) {
                             $('#positions').children().remove();
-                            $('#positions').append('<table style="width:100%"><thead><tr><th>Symbol</th><th>Long Amount</th><th>Long Price</th><th>Short Amount</th><th>Short Price</th><th>Commission</th><th>Swap</th></tr></thead></table>');
+                            $('#positions').append('<table style="width:100%"><thead><tr><th>Id</th><th>Symbol</th><th>Long Amount</th><th>Long Price</th><th>Short Amount</th><th>Short Price</th><th>Commission</th><th>Swap</th></tr></thead></table>');
                             var table = $('#positions').children();
                             var tbody = table.append('<tbody>');
                             for (index in result) {
                                 var trow = '';
                                 var position = result[index];
+                                trow += '<td>' + getValueOrDefault(position['Id'], '') + '</td>';
                                 trow += '<td>' + getValueOrDefault(position['Symbol'], '') + '</td>';
                                 trow += '<td>' + getValueOrDefault(position['LongAmount'], '') + '</td>';
                                 trow += '<td>' + getValueOrDefault(position['LongPrice'], '') + '</td>';
