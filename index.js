@@ -1,9 +1,4 @@
 /**
- * JavaScript TickTrader Web API client
- * Created by ivan.shynkarenka on 11.06.2015
- */
-
-/**
  * Sign request with HMAC-SHA256
  * @param request Request
  */

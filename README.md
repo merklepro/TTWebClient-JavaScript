@@ -2,28 +2,30 @@
 JavaScript Web API client for TickTrader
 
 ## TickTrader Web API interactive documentation
-https://ttdemowebapi.soft-fx.com:8443/api/doc/index
+https://docs.merklepro.com
 
 ## Sample single-page Web Site based on the JavaScript client
-http://softfx.github.io/TTWebClient-JavaScript
+https://github.com/merklepro/TTWebClient-JavaScript
 
 ##### How to solve "XMLHttpRequest: Network Error 0x80070005, Access is denied"?
 If you work with development/staging environment you may have problem with SSL security connections. Only Chrome web browser allows to access SSL resources without valid certificate. For this reason just open above URL with TickTrader Web API interactive documentation, accept the ceritficate and then continue with the site.
 
 ## Dependencies for the JavaScript client
-JavaScript Web API client for TickTrader depends on [jQuery](https://jquery.com/) and [CryptoJS](https://code.google.com/p/crypto-js/).
+JavaScript Web API client for TickTrader depends on:
+- [jQuery](https://jquery.com/)
+- [CryptoJS](https://code.google.com/p/crypto-js/).
 
 You can include them into your code using the following code snipet:
 ```html
-<script src="https://raw.githubusercontent.com/SoftFx/TTWebClient-JavaScript/master/lib/jquery-2.1.4.min.js" type='text/javascript'></script>
-<script src="https://raw.githubusercontent.com/SoftFx/TTWebClient-JavaScript/master/lib/Crypto-JS/core-min.js" type='text/javascript'></script>
-<script src="https://raw.githubusercontent.com/SoftFx/TTWebClient-JavaScript/master/lib/Crypto-JS/sha256-min.js" type='text/javascript'></script>
-<script src="https://raw.githubusercontent.com/SoftFx/TTWebClient-JavaScript/master/lib/Crypto-JS/enc-base64-min.js" type='text/javascript'></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/lib/jquery-2.1.4.min.js" type='text/javascript'></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/lib/Crypto-JS/core-min.js" type='text/javascript'></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/lib/Crypto-JS/sha256-min.js" type='text/javascript'></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/lib/Crypto-JS/enc-base64-min.js" type='text/javascript'></script>
 ```
 
 ## Creating Web API client
 ```JavaScript
-<script src="https://raw.githubusercontent.com/SoftFx/TTWebClient-JavaScript/master/ttwebclient.js"></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/ttwebclient.js"></script>
 <script type="text/javascript">
   var web_api_address = 'https://ttdemowebapi.soft-fx.com:8443';
   var web_api_id = '1de621ca-e686-4ee2-92a5-45c87b4b3fe5';
@@ -273,7 +275,7 @@ function getAllTicksLevel2() {
 Works only for cash accounts!
 ```JavaScript
 function getAllAssets() {
-  try {
+  try {SoftFx
     var client = createWebApiClient();
     return client.getAllAssets()
       .done(function (result) {
@@ -411,7 +413,7 @@ function modifyTrade(tradeId) {
     var request = {
       Id = tradeId, 
       Comment = "Modified limit from Web API sample"
-    };    
+    };
     if (confirm("Do you want to modify trade with Id = " + tradeId + "?")) {
       return client.modifyTrade(request)
         .done(function (result) {
