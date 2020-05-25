@@ -25,9 +25,9 @@ You can include them into your code using the following code snipet:
 
 ## Creating Web API client
 ```JavaScript
-<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/ttwebclient.js"></script>
+<script src="https://raw.githubusercontent.com/merklepro/TTWebClient-JavaScript/master/index.js"></script>
 <script type="text/javascript">
-  var web_api_address = 'https://ttdemowebapi.soft-fx.com:8443';
+  var web_api_address = 'https://api.merklepro.com';
   var web_api_id = '1de621ca-e686-4ee2-92a5-45c87b4b3fe5';
   var web_api_key = 'czNhCcnK6ydePCHZ';
   var web_api_secret = 'J6Jxc2xPr8JyNpWtyEaCPYpkpJpsSQ38xb9AZNxBAGdtQrNDhQwf9mkWQygCKd6K';
